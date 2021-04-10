@@ -7,6 +7,7 @@ CONFIG_FILE=%%HASSIO_CONFIG%%
 SUPERVISOR="$(jq --raw-output '.supervisor' ${CONFIG_FILE})"
 HOMEASSISTANT="$(jq --raw-output '.homeassistant' ${CONFIG_FILE})"
 DATA="$(jq --raw-output '.data // "/usr/share/hassio"' ${CONFIG_FILE})"
+CONF="$(jq --raw-output '.conf // "/Users/jusla3/Projects/HA_v3"' ${CONFIG_FILE})"
 
 # AppArmor Support
 if command -v apparmor_parser > /dev/null 2>&1 && grep hassio-supervisor /sys/kernel/security/apparmor/profiles > /dev/null 2>&1; then
@@ -19,6 +20,7 @@ fi
 HASSIO_DATA=${DATA}
 HASSIO_IMAGE_ID=$(docker inspect --format='{{.Id}}' "${SUPERVISOR}")
 HASSIO_CONTAINER_ID=$(docker inspect --format='{{.Image}}' hassio_supervisor || echo "")
+HASSIO_CONF=${CONF}
 
 runSupervisor() {
     docker rm --force hassio_supervisor || true
@@ -31,6 +33,8 @@ runSupervisor() {
         -v /run/docker.sock:/run/docker.sock \
         -v /run/dbus:/run/dbus \
         -v "${HASSIO_DATA}":/data \
+        -v "${HASSIO_CONF}":/config \
+        -p -p 8123:8123
         -e SUPERVISOR_SHARE="${HASSIO_DATA}" \
         -e SUPERVISOR_NAME=hassio_supervisor \
         -e HOMEASSISTANT_REPOSITORY="${HOMEASSISTANT}" \
