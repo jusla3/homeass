@@ -42,5 +42,5 @@ runSupervisor() {
 }
 
 # Run supervisor
-mkdir -p "${HASSIO_DATA}"
+mkdir -p "${HASSIO_DATA}"  -p "${HASSIO_CONF}"
 ([ "${HASSIO_IMAGE_ID}" = "${HASSIO_CONTAINER_ID}" ] && docker start --attach hassio_supervisor) || runSupervisor
