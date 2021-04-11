@@ -5,42 +5,34 @@ set -e
 CONFIG_FILE=%%HASSIO_CONFIG%%
 
 SUPERVISOR="$(jq --raw-output '.supervisor' ${CONFIG_FILE})"
-HOMEASSISTANT="$(jq --raw-output '.homeassistant' ${CONFIG_FILE})"
+MACHINE="$(jq --raw-output '.machine' ${CONFIG_FILE})"
 DATA="$(jq --raw-output '.data // "/usr/share/hassio"' ${CONFIG_FILE})"
-CONF="$(jq --raw-output '.data // "/Users/jusla3/Projects/HA_v3"' ${CONFIG_FILE})"
-
-# AppArmor Support
-if command -v apparmor_parser > /dev/null 2>&1 && grep hassio-supervisor /sys/kernel/security/apparmor/profiles > /dev/null 2>&1; then
-    APPARMOR="--security-opt apparmor=hassio-supervisor"
-else
-    APPARMOR="--security-opt apparmor:unconfined"
-fi
 
 # Init supervisor
 HASSIO_DATA=${DATA}
 HASSIO_IMAGE_ID=$(docker inspect --format='{{.Id}}' "${SUPERVISOR}")
 HASSIO_CONTAINER_ID=$(docker inspect --format='{{.Image}}' hassio_supervisor || echo "")
-HASSIO_CONF=${CONF}
 
 runSupervisor() {
     docker rm --force hassio_supervisor || true
 
     # shellcheck disable=SC2086
-    docker run --name TT-hassio_supervisor \
+    docker run --name hassio_supervisor \
         --privileged \
-        $APPARMOR \
+        --security-opt apparmor=hassio-supervisor \
         --security-opt seccomp=unconfined \
-        -v /run/docker.sock:/run/docker.sock \
-        -v /run/dbus:/run/dbus \
-        -v "${HASSIO_DATA}":/data \
-        -v /Users/jusla3/Projects/HA_v3:/config \
-        -p -p 8123:8123
-        -e SUPERVISOR_SHARE="${HASSIO_DATA}" \
-        -e SUPERVISOR_NAME=hassio_supervisor \
-        -e HOMEASSISTANT_REPOSITORY="${HOMEASSISTANT}" \
+        -v /run/docker.sock:/run/docker.sock:rw \
+        -v /run/dbus:/run/dbus:ro \
+        -v /run/udev:/run/udev:ro \
+        -v /etc/machine-id:/etc/machine-id:ro \
+        -v "${HASSIO_DATA}":/data:rw \
+        -v /Users/jusla3/Projects/HA_v3:/config:rw \
+        -e SUPERVISOR_SHA RE="${HASSIO_DATA}" \
+        -e SUPERVISOR_NAME=hassio_supeMan \
+        -e SUPERVISOR_MACHINE="${MACHINE}" \
         "${SUPERVISOR}"
 }
 
 # Run supervisor
-mkdir -p "${HASSIO_DATA}"  -p "${HASSIO_CONF}"
+mkdir -p "${HASSIO_DATA}"
 ([ "${HASSIO_IMAGE_ID}" = "${HASSIO_CONTAINER_ID}" ] && docker start --attach hassio_supervisor) || runSupervisor
