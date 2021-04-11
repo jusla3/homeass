@@ -33,7 +33,7 @@ runSupervisor() {
         -v /run/docker.sock:/run/docker.sock \
         -v /run/dbus:/run/dbus \
         -v "${HASSIO_DATA}":/data \
-        -v "${HASSIO_CONF}":/config \
+        -v /Users/jusla3/Projects/HA_v3:/config \
         -p -p 8123:8123
         -e SUPERVISOR_SHARE="${HASSIO_DATA}" \
         -e SUPERVISOR_NAME=hassio_supervisor \
