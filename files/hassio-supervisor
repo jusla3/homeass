@@ -7,7 +7,7 @@ CONFIG_FILE=%%HASSIO_CONFIG%%
 SUPERVISOR="$(jq --raw-output '.supervisor' ${CONFIG_FILE})"
 HOMEASSISTANT="$(jq --raw-output '.homeassistant' ${CONFIG_FILE})"
 DATA="$(jq --raw-output '.data // "/usr/share/hassio"' ${CONFIG_FILE})"
-CONF="$(jq --raw-output '.conf // "/Users/jusla3/Projects/HA_v3"' ${CONFIG_FILE})"
+CONF="$(jq --raw-output '.data // "/Users/jusla3/Projects/HA_v3"' ${CONFIG_FILE})"
 
 # AppArmor Support
 if command -v apparmor_parser > /dev/null 2>&1 && grep hassio-supervisor /sys/kernel/security/apparmor/profiles > /dev/null 2>&1; then
