@@ -15,6 +15,7 @@ warn "If you got this installer from a tutorial, you're probably"
 warn "not expert enough."
 warn ""
 warn "Press any key to continue or control + c to quit"
+warn "Doing my ting !!!!!!!!t"
 read
 
 ARCH=$(uname -m)
